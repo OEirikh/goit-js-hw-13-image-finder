@@ -6,58 +6,52 @@ import '@pnotify/core/dist/BrightTheme.css';
 import { error } from '@pnotify/core';
 import '@pnotify/core/dist/PNotify.css';
 
-const { searchForm, gallery, btn } = refs;
-
-// apiService.fetchImages('car');
-// // console.log(apiService.fetchImages);
-// console.log(response);
+const { searchForm, gallery, btnLoadMore } = refs;
 
 searchForm.addEventListener('submit', onSerchFormSubmit);
-btn.addEventListener('click', onBtnClick);
+btnLoadMore.addEventListener('click', onBtnLoadMoreClick);
+
+updateGallery();
 
 function onSerchFormSubmit(e) {
   e.preventDefault();
-  console.log(e.currentTarget.elements.query.value);
-  if (
-    e.currentTarget.elements.query.value === '' ||
-    e.currentTarget.elements.query.value.length < 2
-  ) {
+  const input = e.currentTarget.elements.query;
+
+  if (input.value === '' || input.length < 2) {
     return error({ text: 'Please specify your request', delay: 1500 });
   }
-  resetPage();
 
-  console.log();
+  pegeReset();
+  updateImageName(input.value);
+  updateGallery();
 
+  btnLoadMore.classList.add('visible');
+}
+
+function onBtnLoadMoreClick() {
+  pageEnlarge();
+  updateGallery().then(() =>
+    btnLoadMore.scrollIntoView({
+      block: 'end',
+      behavior: 'smooth',
+    }),
+  );
+}
+
+function updateGallery() {
+  gallery.innerHTML = '';
   apiService.fetchImages().then(({ hits }) => {
-    console.log(e.target.elements.query.value);
-    clearList();
     gallery.insertAdjacentHTML('beforeend', imagesCard(hits));
   });
-
-  btn.classList.add('visible');
 }
-
-function onBtnClick() {
-  pageIncrease();
-  apiService
-    .fetchImages()
-    .then(({ hits }) => {
-      gallery.insertAdjacentHTML('beforeend', imagesCard(hits));
-    })
-    .then(() =>
-      btn.scrollIntoView({
-        block: 'end',
-        behavior: 'smooth',
-      }),
-    );
-}
-
-const pageIncrease = () => {
-  apiService.page += 1;
-};
-const resetPage = () => {
+const pegeReset = () => {
   apiService.page = 1;
 };
-const clearList = () => {
-  gallery.innerHTML = '';
+
+const updateImageName = name => {
+  apiService.imageName = name;
+};
+
+const pageEnlarge = () => {
+  apiService.page += 1;
 };
