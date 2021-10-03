@@ -22,6 +22,7 @@ function onSerchFormSubmit(e) {
   }
 
   pegeReset();
+  clearGallery();
   updateImageName(input.value);
   updateGallery();
 
@@ -30,22 +31,30 @@ function onSerchFormSubmit(e) {
 
 function onBtnLoadMoreClick() {
   pageEnlarge();
-  updateGallery().then(() =>
-    btnLoadMore.scrollIntoView({
-      block: 'end',
-      behavior: 'smooth',
-    }),
-  );
+  apiService
+    .fetchImages()
+    .then(({ hits }) => {
+      gallery.insertAdjacentHTML('beforeend', imagesCard(hits));
+    })
+    .then(() =>
+      btnLoadMore.scrollIntoView({
+        block: 'end',
+        behavior: 'smooth',
+      }),
+    );
 }
 
 function updateGallery() {
-  gallery.innerHTML = '';
   apiService.fetchImages().then(({ hits }) => {
     gallery.insertAdjacentHTML('beforeend', imagesCard(hits));
   });
 }
 const pegeReset = () => {
   apiService.page = 1;
+};
+
+const clearGallery = () => {
+  gallery.innerHTML = '';
 };
 
 const updateImageName = name => {
